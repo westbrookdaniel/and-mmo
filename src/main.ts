@@ -41,24 +41,21 @@ async function game(app: PIXI.Application) {
   player.x = 300;
   player.y = 300;
 
+  const gun = PIXI.Sprite.from("ak47");
   const helmet = PIXI.Sprite.from("helmet");
+
+  gun.x = -helmet.width / 2 + 4;
+  gun.y = -helmet.height / 2 - 20;
+  player.addChild(gun);
+
   helmet.x = -helmet.width / 2;
   helmet.y = -helmet.height / 2;
   player.addChild(helmet);
 
-  const gun = PIXI.Sprite.from("ak47");
-  gun.x = -helmet.width / 2 - 20;
-  gun.y = -helmet.height / 2 - 30;
-  player.addChild(gun);
-
   app.stage.addChild(player);
 
   app.ticker.add(() => {
-    // Look at mouse
     const newAngle = angleTo(key.mouse, player);
-    const delta = angleDelta(newAngle, player.angle);
-    if (Math.sign(delta) > 5) {
-      player.angle += Math.sign(delta) * 0.1;
-    }
+    player.angle = newAngle - 90;
   });
 }
