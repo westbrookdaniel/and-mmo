@@ -3,7 +3,7 @@ import * as Vec from "./vec";
 import * as Rad from "./rad";
 
 describe("vec", () => {
-  const origin = { x: 0, y: 0 };
+  const origin = Vec.zero();
 
   test("add", () => {
     expect(Vec.add(origin, { x: 1, y: 1 })).toEqual({ x: 1, y: 1 });

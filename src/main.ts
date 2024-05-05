@@ -4,6 +4,8 @@ import { SceneManager } from "./scene";
 import { Application } from "pixi.js";
 import * as Vec from "./util/vec";
 import * as Rad from "./util/rad";
+import { World } from "./physics/world";
+import { Body } from "./physics/body";
 
 const app = new Application();
 await app.init({ resizeTo: window });
@@ -13,6 +15,7 @@ globalThis.__PIXI_APP__ = app;
 
 const scene = new SceneManager(app, { preload, game });
 const key = new KeyManager(app);
+const world = new World();
 scene.set("preload");
 
 async function preload() {
@@ -54,6 +57,38 @@ async function game(app: PIXI.Application) {
   player.addChild(helmet);
 
   app.stage.addChild(player);
+  const body = new Body({
+    type: "kinematic",
+    width: player.width,
+    height: player.height,
+  });
+  body.x = player.x;
+  body.y = player.y;
+  app.ticker.add(() => {
+    player.x = body.x;
+    player.y = body.y;
+  });
+  world.add(body);
+  body.acc.x = 0.001;
+
+  const wall = new PIXI.Graphics();
+  wall.rect(0, 0, 10, 400);
+  wall.fill("#222222");
+  wall.x = 700;
+  wall.y = 100;
+  const wallBody = new Body({
+    type: "kinematic",
+    width: wall.width,
+    height: wall.height,
+  });
+  wallBody.x = wall.x;
+  wallBody.y = wall.y;
+  app.ticker.add(() => {
+    wall.x = wallBody.x;
+    wall.y = wallBody.y;
+  });
+  world.add(wallBody);
+  app.stage.addChild(wall);
 
   app.ticker.add(() => {
     const dir = Vec.direction({ head: key.mouse, tail: player });
