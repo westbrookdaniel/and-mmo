@@ -2,7 +2,8 @@ import * as PIXI from "pixi.js";
 import { KeyManager } from "./key";
 import { SceneManager } from "./scene";
 import { Application } from "pixi.js";
-import { angleDelta, angleTo } from "./math";
+import * as Vec from "./util/vec";
+import * as Rad from "./util/rad";
 
 const app = new Application();
 await app.init({ resizeTo: window });
@@ -55,7 +56,7 @@ async function game(app: PIXI.Application) {
   app.stage.addChild(player);
 
   app.ticker.add(() => {
-    const newAngle = angleTo(key.mouse, player);
-    player.angle = newAngle - 90;
+    const dir = Vec.direction({ head: key.mouse, tail: player });
+    player.rotation = dir - Rad.toRad(90);
   });
 }
