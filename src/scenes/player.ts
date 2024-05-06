@@ -12,6 +12,7 @@ export function createPlayer() {
     body: {
       mass: 1,
       damping: 0.5,
+      fixedRotation: true,
     },
   });
 
@@ -23,7 +24,6 @@ export function createPlayer() {
   });
 
   key.on("up", () => {
-    console.log("yo");
     body.applyImpulse([0, -20]);
   });
 
