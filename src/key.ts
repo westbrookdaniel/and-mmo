@@ -6,13 +6,23 @@ export interface KeymapEntry {
 export class KeyManager {
   private entries: KeymapEntry[] = [];
   mouse = { x: 0, y: 0 };
-  map = new Map<string, boolean>();
-
-  constructor() {}
+  map: Record<string, boolean> = {};
+  subs: { alias: string; cb: () => void }[] = [];
 
   private onKey(key: string, pressed: boolean) {
     this.entries.forEach((entry) => {
-      if (entry.keys.includes(key)) this.map.set(entry.alias, pressed);
+      if (entry.keys.includes(key)) {
+        if (this.map[entry.alias] === pressed) return;
+
+        if (pressed) {
+          this.subs
+        // Only ever activate subs 
+            .filter((s) => s.alias === entry.alias)
+            .forEach((s) => s.cb());
+        }
+
+        this.map[entry.alias] = pressed;
+      }
     });
   }
 
@@ -32,10 +42,7 @@ export class KeyManager {
   on(alias: string, cb: () => void) {
     const entry = this.entries.find((e) => e.alias === alias);
     if (!entry) throw new Error("Entry does not exist");
-    // TODO make this a wait for keydown then doesn't happen again until after keyup
-    document.addEventListener("keydown", (e) => {
-      if (entry.keys.includes(e.key)) cb();
-    });
+    this.subs.push({ alias, cb });
   }
 }
 

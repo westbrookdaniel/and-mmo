@@ -18,8 +18,8 @@ export function createPlayer() {
 
   Ticker.shared.add(() => {
     const v = [0, 0];
-    if (key.map.get("left")) v[0] -= 1;
-    if (key.map.get("right")) v[0] += 1;
+    if (key.map.left) v[0] -= 1;
+    if (key.map.right) v[0] += 1;
     body.applyImpulse(v);
   });
 
