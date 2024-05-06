@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  p2-es:
+    specifier: ^1.2.3
+    version: 1.2.3
   pixi.js:
     specifier: ^8.1.1
     version: 8.1.1
@@ -922,6 +925,12 @@ packages:
       yocto-queue: 1.0.0
     dev: true
 
+  /p2-es@1.2.3:
+    resolution: {integrity: sha512-H16C/gjXz5G6LZUADtVe/5G7tZwtZrY6wujuLjPfXZLtjKztvFIgdhynShQN1MmpqSwzJ8GbXrOgedWxEagcTg==}
+    dependencies:
+      poly-decomp-es: 0.4.2
+    dev: false
+
   /parse-svg-path@0.1.2:
     resolution: {integrity: sha512-JyPSBnkTJ0AI8GGJLfMXvKq42cj5c006fnLz6fXy6zfoVjJizi8BNTpu8on8ziI1cKy9d9DGNuY17Ce7wuejpQ==}
     dev: false
@@ -969,6 +978,10 @@ packages:
       mlly: 1.7.0
       pathe: 1.1.2
     dev: true
+
+  /poly-decomp-es@0.4.2:
+    resolution: {integrity: sha512-akjZkaTeyfECMNkMqv0g9gFiU2HjpZ5ubJA/aczw1ILdgWQbv1OPwCi05/9JbY2GnGpjm9k85Jdbd/j/p/lg/g==}
+    dev: false
 
   /postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}

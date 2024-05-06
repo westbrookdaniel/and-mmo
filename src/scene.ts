@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 
-type SceneMap = Record<string, (app: PIXI.Application) => void>;
+type SceneMap = Record<string, (app: PIXI.Container) => void>;
+
+const ZOOM = 10;
 
 export class SceneManager {
   scenes: SceneMap;
@@ -20,8 +22,13 @@ export class SceneManager {
       this.app.stage.removeChildren();
     }
 
+    const c = new PIXI.Container();
+    c.scale.x = ZOOM;
+    c.scale.y = ZOOM;
+    this.app.stage.addChild(c);
+
     const scene = this.scenes[name];
     this.current = name;
-    scene(this.app);
+    scene(c);
   }
 }
