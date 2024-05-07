@@ -2,12 +2,17 @@ import { Ticker } from "pixi.js";
 import { key } from "../key";
 import { createBox } from "./box";
 
-export function createPlayer() {
+interface Options {
+  x: number;
+  y: number;
+}
+
+export function createPlayer({ x, y }: Options) {
   const { graphics, body } = createBox({
     width: 4,
     height: 4,
-    x: 30,
-    y: 50,
+    x,
+    y,
     fill: "green",
     body: {
       mass: 1,
@@ -24,6 +29,7 @@ export function createPlayer() {
   });
 
   key.on("up", () => {
+    // TODO floor jump resetting
     body.applyImpulse([0, -20]);
   });
 
