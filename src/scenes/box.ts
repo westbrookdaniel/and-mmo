@@ -38,10 +38,15 @@ export function createBox({
   b.addShape(new p2.Box({ width, height }));
   world.addBody(b);
 
-  Ticker.shared.add(() => {
+  Ticker.shared.add((time) => {
+    if (g.destroyed) return time.destroy();
     g.x = b.position[0];
     g.y = b.position[1];
     g.angle = b.angle;
+  });
+
+  g.on("removed", () => {
+    world.removeBody(b);
   });
 
   return { body: b, graphics: g };

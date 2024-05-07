@@ -41,8 +41,11 @@ export class Camera extends PIXI.Container {
   canvas: PIXI.Application["canvas"];
   zoom: number;
 
+  private ticker = new Ticker();
+
   constructor(options: Options) {
     super();
+    this.ticker.start();
     this.canvas = options.canvas;
     this.scale.x = options.zoom ?? 1;
     this.scale.y = options.zoom ?? 1;
@@ -52,7 +55,9 @@ export class Camera extends PIXI.Container {
   follow(e: PIXI.Container, options?: FollowOptions) {
     if (e.parent !== this) throw new Error("Must be child of the Camera");
 
-    Ticker.shared.add(() => {
+    this.ticker.add((time) => {
+      if (this.destroyed) return time.destroy();
+
       const minX = unwrapGetter(options?.minX);
       const minY = unwrapGetter(options?.minY);
       const maxX = unwrapGetter(options?.maxX);

@@ -5,6 +5,7 @@ type SceneMap = Record<string, (app: Camera) => void>;
 
 export class SceneManager {
   current: string | null = null;
+  camera: Camera | null = null;
 
   constructor(
     public app: PIXI.Application,
@@ -13,17 +14,17 @@ export class SceneManager {
 
   set(name: string) {
     if (this.current) {
-      this.app.stage.removeChildren();
+      this.camera?.destroy();
     }
 
-    const c = new Camera({
+    this.camera = new Camera({
       canvas: this.app.canvas,
       zoom: 10,
     });
-    this.app.stage.addChild(c);
+    this.app.stage.addChild(this.camera);
 
     const scene = this.scenes[name];
     this.current = name;
-    scene(c);
+    scene(this.camera);
   }
 }

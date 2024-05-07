@@ -40,6 +40,7 @@ export class KeyManager {
   }
 
   on(alias: string, cb: () => void) {
+    // TODO unsub
     const entry = this.entries.find((e) => e.alias === alias);
     if (!entry) throw new Error("Entry does not exist");
     this.subs.push({ alias, cb });

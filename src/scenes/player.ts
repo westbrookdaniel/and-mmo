@@ -21,7 +21,8 @@ export function createPlayer({ x, y }: Options) {
     },
   });
 
-  Ticker.shared.add(() => {
+  Ticker.shared.add((time) => {
+    if (graphics.destroyed) return time.destroy();
     const v = [0, 0];
     if (key.map.left) v[0] -= 1;
     if (key.map.right) v[0] += 1;

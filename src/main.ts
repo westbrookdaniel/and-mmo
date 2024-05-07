@@ -8,19 +8,24 @@ import { createBox } from "./scenes/box";
 import { Camera } from "./camera";
 
 const app = new Application();
-await app.init({ resizeTo: window });
-document.body.appendChild(app.canvas);
 // @ts-expect-error
 globalThis.__PIXI_APP__ = app;
 
 declare global {
   var world: p2.World;
+  var scene: SceneManager;
 }
-globalThis.world = new p2.World({ gravity: [0, 5] });
-app.ticker.add((t) => world.step(1 / 60, t.deltaMS, 10));
 
-const scene = new SceneManager(app, { preload, game });
-scene.set("preload");
+app.init({ resizeTo: window }).then(() => {
+  document.body.appendChild(app.canvas);
+
+  globalThis.world = new p2.World({ gravity: [0, 5] });
+  globalThis.scene = new SceneManager(app, { preload, game });
+
+  app.ticker.add((t) => world.step(1 / 60, t.deltaMS, 10));
+
+  scene.set("preload");
+});
 
 async function preload() {
   key.set([
@@ -68,4 +73,6 @@ async function game(c: Camera) {
   // TODO an enemy
   // TODO a lil physics push over to check rotation works
   // TODO scale game size to screen?
+
+  // setTimeout(() => scene.set("game"), 2000);
 }
