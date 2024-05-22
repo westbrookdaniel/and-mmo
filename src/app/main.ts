@@ -33,7 +33,7 @@ async function preload() {
   key.set([
     { alias: "left", keys: ["a", "A", "ArrowLeft"] },
     { alias: "right", keys: ["d", "D", "ArrowRight"] },
-    { alias: "up", keys: ["w", "W", "ArrowUp", " "] },
+    { alias: "up", keys: ["w", "W", "ArrowUp"] },
     { alias: "down", keys: ["s", "S", "ArrowDown"] },
   ]);
 
