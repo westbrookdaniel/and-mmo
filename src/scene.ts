@@ -1,16 +1,23 @@
 import * as PIXI from "pixi.js";
 import { Camera } from "./camera";
 
-type SceneMap = Record<string, (app: Camera) => void>;
+type SceneMap = Record<string, () => void>;
+
+const zoom = 10;
 
 export class SceneManager {
   current: string | null = null;
-  camera: Camera | null = null;
+  camera: Camera;
 
   constructor(
     public app: PIXI.Application,
     public scenes: SceneMap,
-  ) {}
+  ) {
+    this.camera = new Camera({
+      canvas: this.app.canvas,
+      zoom,
+    });
+  }
 
   set(name: string) {
     if (this.current) {
@@ -19,12 +26,12 @@ export class SceneManager {
 
     this.camera = new Camera({
       canvas: this.app.canvas,
-      zoom: 10,
+      zoom,
     });
     this.app.stage.addChild(this.camera);
 
     const scene = this.scenes[name];
     this.current = name;
-    scene(this.camera);
+    scene();
   }
 }

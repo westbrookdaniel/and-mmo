@@ -5,7 +5,7 @@ import { SceneManager } from "./scene";
 import { Application } from "pixi.js";
 import { createPlayer } from "./scenes/player";
 import { createBox } from "./scenes/box";
-import { Camera } from "./camera";
+import { createEnemy } from "./scenes/enemy";
 
 const app = new Application();
 // @ts-expect-error
@@ -38,29 +38,25 @@ async function preload() {
   scene.set("game");
 }
 
-async function game(c: Camera) {
+async function game() {
   const bg = new PIXI.Graphics();
   bg.rect(0, 0, 150, 90);
   bg.fill("#4a3426");
-  c.addChild(bg);
+  scene.camera.addChild(bg);
 
   const player = createPlayer({
     x: 30,
     y: 20,
   });
-  c.addChild(player.graphics);
 
-  const d = 40;
-  c.follow(player.graphics, {
+  scene.camera.follow(player.graphics, {
     minX: 0,
     minY: 0,
     maxY: 0,
     offsetY: 100,
-    smoothingX: (p, t) => p - (p - t) / 4,
-    deadzone: { top: d, left: d, right: d, bottom: d },
   });
 
-  const floor = createBox({
+  createBox({
     width: 90,
     height: 1,
     x: 60,
@@ -68,7 +64,11 @@ async function game(c: Camera) {
     fill: "#222",
     body: { mass: 0 },
   });
-  c.addChild(floor.graphics);
+
+  createEnemy({
+    x: 80,
+    y: 20,
+  });
 
   // TODO an enemy
   // TODO a lil physics push over to check rotation works

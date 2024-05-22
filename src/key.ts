@@ -16,7 +16,6 @@ export class KeyManager {
 
         if (pressed) {
           this.subs
-        // Only ever activate subs 
             .filter((s) => s.alias === entry.alias)
             .forEach((s) => s.cb());
         }

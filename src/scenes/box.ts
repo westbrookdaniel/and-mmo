@@ -49,5 +49,7 @@ export function createBox({
     world.removeBody(b);
   });
 
+  scene.camera.addChild(g);
+
   return { body: b, graphics: g };
 }
