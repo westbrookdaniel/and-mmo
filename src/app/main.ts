@@ -21,9 +21,9 @@ app.init({ resizeTo: window }).then(() => {
   globalThis.key = new KeyManager();
 
   globalThis.socket = io(
-    import.meta.env.NODE_ENV === "production"
-      ? window.location.origin
-      : "http://localhost:4000",
+    import.meta.env.MODE === "development"
+      ? "http://localhost:4000"
+      : window.location.origin,
   );
 
   scene.set("preload");

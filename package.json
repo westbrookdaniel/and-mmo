@@ -26,7 +26,7 @@
     "vitest": "^1.6.0"
   },
   "scripts": {
-    "dev": "concurrently \"pnpm dev:client\" \"pnpm dev:server\"",
+    "dev": "NODE_ENV='dev' concurrently \"pnpm dev:client\" \"pnpm dev:server\"",
     "dev:client": "vite",
     "dev:server": "tsx watch --tsconfig tsconfig.server.json src/server",
     "build": "concurrently \"pnpm build:client\" \"pnpm build:server\"",

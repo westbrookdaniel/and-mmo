@@ -11,7 +11,7 @@ import { createWorld } from "./world";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const { PORT = 4000, NODE_ENV } = process.env;
-const isDev = NODE_ENV !== "production";
+const isDev = NODE_ENV === "dev";
 
 const app = express();
 const server = http.createServer(app);
