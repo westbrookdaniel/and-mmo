@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Camera } from "./camera";
+// import { GameObject } from "./object";
 
 type SceneMap = Record<string, () => void>;
 
@@ -8,6 +9,8 @@ const zoom = 10;
 export class SceneManager {
   current: string | null = null;
   camera: Camera;
+
+  // gameObjects: GameObject[] = [];
 
   constructor(
     public app: PIXI.Application,
@@ -34,4 +37,8 @@ export class SceneManager {
     this.current = name;
     scene();
   }
+
+  // addObject(gameObject: GameObject<any>) {
+  //   this.gameObjects.push(gameObject);
+  // }
 }

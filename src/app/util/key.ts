@@ -3,10 +3,18 @@ export interface KeymapEntry {
   keys: string[];
 }
 
+const map = {};
+
 export class KeyManager {
   private entries: KeymapEntry[] = [];
   mouse = { x: 0, y: 0 };
-  map: Record<string, boolean> = {};
+  map: Record<string, boolean> = new Proxy(map, {
+    set(target, prop, reciever) {
+      const success = Reflect.set(target, prop, reciever);
+      socket.emit("input", map);
+      return success;
+    },
+  });
   subs: { alias: string; cb: () => void }[] = [];
 
   private onKey(key: string, pressed: boolean) {
