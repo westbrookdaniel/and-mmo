@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
 import * as p2 from "p2-es";
-import { key } from "./key";
-import { SceneManager } from "./scene";
+import { KeyManager } from "./util/key";
+import { SceneManager } from "./util/scene";
 import { Application } from "pixi.js";
-import { createPlayer } from "./scenes/player";
-import { createBox } from "./scenes/box";
-import { createEnemy } from "./scenes/enemy";
+import { PlayerObject } from "./objects/player";
+import { BoxObject } from "./objects/box";
+import { EnemyObject } from "./objects/enemy";
 
 const app = new Application();
 // @ts-expect-error
@@ -14,11 +14,13 @@ globalThis.__PIXI_APP__ = app;
 declare global {
   var world: p2.World;
   var scene: SceneManager;
+  var key: KeyManager;
 }
 
 app.init({ resizeTo: window }).then(() => {
   document.body.appendChild(app.canvas);
 
+  globalThis.key = new KeyManager();
   globalThis.world = new p2.World({ gravity: [0, 5] });
   globalThis.scene = new SceneManager(app, { preload, game });
 
@@ -44,33 +46,33 @@ async function game() {
   bg.fill("#4a3426");
   scene.camera.addChild(bg);
 
-  const player = createPlayer({
+  const player = new PlayerObject("player", {
     x: 30,
     y: 20,
   });
 
-  scene.camera.follow(player.graphics, {
+  scene.camera.follow(player.display, {
     minX: 0,
     minY: 0,
     maxY: 0,
     offsetY: 100,
   });
 
-  createBox({
+  new BoxObject("floor", {
     width: 90,
     height: 1,
-    x: 60,
-    y: 40,
-    fill: "#222",
-    body: { mass: 0 },
+    color: "#222",
+    body: {
+      position: [60, 40],
+      mass: 0,
+    },
   });
 
-  createEnemy({
+  new EnemyObject("enemy", {
     x: 80,
     y: 20,
   });
 
-  // TODO an enemy
   // TODO a lil physics push over to check rotation works
   // TODO scale game size to screen?
 

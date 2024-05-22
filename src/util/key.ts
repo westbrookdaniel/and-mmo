@@ -45,5 +45,3 @@ export class KeyManager {
     this.subs.push({ alias, cb });
   }
 }
-
-export const key = new KeyManager();
