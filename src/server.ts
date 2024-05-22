@@ -54,7 +54,7 @@ function create(data: Data, opts: p2.BodyOptions) {
 }
 
 let then = performance.now();
-const step = 1 / 30;
+const step = 1 / 60;
 function tick() {
   const now = performance.now();
   const elapsed = now - then;
@@ -73,7 +73,7 @@ function tick() {
     b.angle,
   ]);
   io.emit("tick", data);
-  setTimeout(() => tick(), step);
+  setTimeout(() => tick(), step * 1000);
 }
 tick();
 
@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
     {
       position: [20, 30],
       mass: 1,
-      damping: 0.5,
+      damping: 0.7,
       fixedRotation: false,
     },
   );
@@ -119,7 +119,7 @@ io.on("connection", (socket) => {
     if (inputMap.right) v[0] += 1;
     if (inputMap.up) v[1] -= 1;
     if (inputMap.down) v[1] += 1;
-    p2.vec2.multiply(v, v, [0.05, 0.05]);
+    p2.vec2.multiply(v, v, [0.5, 0.5]);
     body.applyImpulse(v);
   };
 
