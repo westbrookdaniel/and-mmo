@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { KeyManager } from "./util/key";
 import { SceneManager } from "./util/scene";
 import { Application } from "pixi.js";
+import * as p2 from "p2-es";
 
 const app = new Application();
 // @ts-expect-error
@@ -12,6 +13,7 @@ declare global {
   var scene: SceneManager;
   var key: KeyManager;
   var socket: Socket;
+  var world: p2.World;
 }
 
 app.init({ resizeTo: window }).then(() => {
@@ -25,6 +27,15 @@ app.init({ resizeTo: window }).then(() => {
       ? "http://localhost:4000"
       : window.location.origin,
   );
+
+  globalThis.world = new p2.World({ gravity: [0, 0] });
+
+  const step = 1 / 60;
+  function tick(delta: number) {
+    world.step(step, delta, 10);
+    requestAnimationFrame(tick);
+  }
+  tick(step);
 
   scene.set("preload");
 });
@@ -46,18 +57,64 @@ async function game() {
   bg.fill("#333");
   scene.camera.addChild(bg);
 
-  const bodies: Record<number, PIXI.Graphics> = {};
-
+  let lastTick: any[] = [];
   socket.on("tick", (objects) => {
     const using: string[] = [];
 
-    objects.forEach(([bodyId, data, x, y, angle]: any) => {
-      if (!bodies[bodyId]) {
+    // Client Physics and Sync
+    // TODO combine server/client body/size/color configs in data request and not every tick
+    objects.forEach(([bodyId, data, pos, angle, vel, angVel]: any) => {
+      if (!world.bodies.find((b) => b.id === bodyId)) {
+        const body = new p2.Body({
+          position: pos,
+          mass: 1,
+          damping: 0.7,
+          fixedRotation: false,
+          angle,
+          id: bodyId,
+        });
+        const shape = new p2.Box({ width: data.width, height: data.height });
+        body.addShape(shape);
+        world.addBody(body);
+      }
+
+      const body = world.bodies.find((b) => b.id === bodyId);
+      if (body) {
+        body.position = pos;
+        body.angle = angle;
+        body.velocity = vel;
+        body.angularVelocity = angVel;
+      }
+
+      using.push(bodyId.toString());
+    });
+
+    world.bodies.forEach((b) => {
+      if (!using.includes(b.id.toString())) {
+        world.removeBody(b);
+      }
+    });
+
+    lastTick = objects;
+  });
+
+  // Client Rendering
+  const existing: Record<number, PIXI.Graphics> = {};
+  app.ticker.add(() => {
+    const using: string[] = [];
+
+    // TODO combine server/client body/size/color configs in data request and not every tick
+    world.bodies.forEach((b) => {
+      const last = lastTick.find((l) => l[0] === b.id);
+      if (!last) return;
+      const [bodyId, data] = last;
+      if (!existing[bodyId]) {
         const g = new PIXI.Graphics()
           .rect(-data.width / 2, -data.height / 2, data.width, data.height)
           .fill(data.color);
         scene.camera.addChild(g);
-        bodies[bodyId] = g;
+
+        existing[bodyId] = g;
 
         // if (data.id === socket.id) {
         //   scene.camera.follow(g, {
@@ -68,19 +125,18 @@ async function game() {
         // }
       }
 
-      const body = bodies[bodyId];
-      body.x = x;
-      body.y = y;
-      body.rotation = angle;
+      const g = existing[bodyId];
+      g.x = b.position[0];
+      g.y = b.position[1];
+      g.rotation = b.angle;
 
       using.push(bodyId.toString());
     });
 
-    // TODO Diff to remove
-    Object.keys(bodies).forEach((k) => {
+    Object.keys(existing).forEach((k) => {
       if (!using.includes(k.toString())) {
-        bodies[k as any].destroy();
-        delete bodies[k as any];
+        existing[k as any].destroy();
+        delete existing[k as any];
       }
     });
   });

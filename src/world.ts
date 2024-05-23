@@ -50,24 +50,26 @@ export function createWorld(io: IO) {
   function tick() {
     const now = performance.now();
     const elapsed = now - then;
-
     Object.values(updaters).forEach((u) => u(elapsed));
-
     world.step(step, elapsed, 10);
-
     then = now;
-
-    const data = world.bodies.map((b) => [
-      b.id,
-      dataMap[b.id],
-      b.position[0],
-      b.position[1],
-      b.angle,
-    ]);
-    io.emit("tick", data);
     setTimeout(() => tick(), step * 1000);
   }
   tick();
+
+  function emiter() {
+    const data = world.bodies.map((b) => [
+      b.id,
+      dataMap[b.id],
+      [b.position[0], b.position[1]],
+      b.angle,
+      [b.velocity[0], b.velocity[1]],
+      b.angularVelocity,
+    ]);
+    io.emit("tick", data);
+    setTimeout(() => emiter(), (1 / 15) * 1000);
+  }
+  emiter();
 
   io.on("connection", (socket) => {
     const { destroy, body } = create(
