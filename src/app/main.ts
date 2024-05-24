@@ -66,7 +66,7 @@ async function game() {
   });
 
   app.ticker.add(() => {
-    renderBodies(lastTick);
+    renderBodies(lastTick.map((t) => t[0]));
   });
 
   // setTimeout(() => scene.set("game"), 2000);

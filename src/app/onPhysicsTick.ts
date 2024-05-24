@@ -10,6 +10,7 @@ const creator = new Creator(
     vel: p2.Vec2,
     angVel: number,
   ) => {
+    // TODO we're double fetching this here and renderBodies
     const data = await emitForData("data", bodyId);
     if (!data) throw new Error("No data for body");
 

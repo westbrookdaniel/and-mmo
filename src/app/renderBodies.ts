@@ -3,6 +3,7 @@ import { emitForData } from "./util";
 import { Creator } from "./util/creator";
 
 const creator = new Creator(async (bodyId: string) => {
+  // TODO we're double fetching this here and onPhysicsTick
   const data = await emitForData("data", parseInt(bodyId));
   if (!data) throw new Error("No data for body");
 
@@ -25,11 +26,10 @@ const creator = new Creator(async (bodyId: string) => {
   };
 });
 
-export function renderBodies(lastTick: any[]) {
+export function renderBodies(bodyIds: number[]) {
   world.bodies.forEach(async (b) => {
-    const last = lastTick.find((l) => l[0] === b.id);
-    if (!last) return;
-    const [bodyId] = last;
+    const bodyId = bodyIds.find((id) => id === b.id);
+    if (!bodyId) return;
 
     creator.create(bodyId);
 
@@ -40,7 +40,7 @@ export function renderBodies(lastTick: any[]) {
     g.rotation = b.angle;
   });
 
-  const used = lastTick.map((l) => l[0].toString());
+  const used = bodyIds.map((id) => id.toString());
   creator.created.forEach((k) => {
     if (!used.includes(k)) {
       creator.remove(k);
