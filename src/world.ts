@@ -67,7 +67,7 @@ export function createWorld(io: IO) {
       b.angularVelocity,
     ]);
     io.emit("tick", data);
-    setTimeout(() => emiter(), (1 / 15) * 1000);
+    setTimeout(() => emiter(), (1 / 30) * 1000);
   }
   emiter();
 
