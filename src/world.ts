@@ -22,7 +22,14 @@ export interface Data {
   color: string;
   width: number;
   height: number;
+  bodyOptions?: Partial<p2.BodyOptions>;
 }
+
+const defaultBodyOptions: Partial<p2.BodyOptions> = {
+  mass: 1,
+  damping: 0.7,
+  fixedRotation: false,
+};
 
 export function createWorld(io: IO) {
   const dataMap: Record<number, Data> = {};
@@ -30,9 +37,24 @@ export function createWorld(io: IO) {
 
   const world = new p2.World({ gravity: [0, 0] });
 
-  function create(data: Data, opts: p2.BodyOptions) {
-    const body = new p2.Body(opts);
-    const shape = new p2.Box({ width: data.width, height: data.height });
+  function create(
+    data: Data,
+    pos: p2.Vec2,
+    angle: number,
+    vel: p2.Vec2,
+    angularVel: number,
+  ) {
+    const body = new p2.Body({
+      position: pos,
+      angle,
+      velocity: vel,
+      angularVelocity: angularVel,
+      ...data.bodyOptions,
+    });
+    const shape = new p2.Box({
+      width: data.width,
+      height: data.height,
+    });
     body.addShape(shape);
     dataMap[body.id] = data;
     world.addBody(body);
@@ -60,7 +82,6 @@ export function createWorld(io: IO) {
   function emiter() {
     const data = world.bodies.map((b) => [
       b.id,
-      dataMap[b.id],
       [b.position[0], b.position[1]],
       b.angle,
       [b.velocity[0], b.velocity[1]],
@@ -78,18 +99,21 @@ export function createWorld(io: IO) {
         height: 4,
         width: 4,
         color: stringToColour(socket.id),
+        bodyOptions: defaultBodyOptions,
       },
-      {
-        position: [20, 30],
-        mass: 1,
-        damping: 0.7,
-        fixedRotation: false,
-      },
+      [20, 30],
+      0,
+      [0, 0],
+      0,
     );
 
     let inputMap: any = {};
     socket.on("input", (map) => {
       inputMap = map;
+    });
+
+    socket.on("data", (bodyId, res) => {
+      res(dataMap[bodyId]);
     });
 
     updaters[socket.id] = () => {
@@ -98,7 +122,8 @@ export function createWorld(io: IO) {
       if (inputMap.right) v[0] += 1;
       if (inputMap.up) v[1] -= 1;
       if (inputMap.down) v[1] += 1;
-      p2.vec2.multiply(v, v, [0.5, 0.5]);
+      p2.vec2.normalize(v, v);
+      p2.vec2.multiply(v, v, [0.3, 0.3]);
       body.applyImpulse(v);
     };
 
