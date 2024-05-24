@@ -5,6 +5,8 @@ import type {
   RemoveAcknowledgements,
   StrictEventEmitter,
 } from "socket.io/dist/typed-events";
+import { Entities } from "./entities.js";
+import { stringToColour } from "./util.js";
 
 type IO = StrictEventEmitter<
   DefaultEventsMap,
@@ -17,14 +19,6 @@ type IO = StrictEventEmitter<
   >
 >;
 
-export interface Data {
-  id: string;
-  color: string;
-  width: number;
-  height: number;
-  bodyOptions?: Partial<p2.BodyOptions>;
-}
-
 const defaultBodyOptions: Partial<p2.BodyOptions> = {
   mass: 1,
   damping: 0.7,
@@ -32,48 +26,16 @@ const defaultBodyOptions: Partial<p2.BodyOptions> = {
 };
 
 export function createWorld(io: IO) {
-  const dataMap: Record<number, Data> = {};
-  const updaters: Record<string, (d: number) => void> = {};
-
   const world = new p2.World({ gravity: [0, 0] });
-
-  function create(
-    data: Data,
-    pos: p2.Vec2,
-    angle: number,
-    vel: p2.Vec2,
-    angularVel: number,
-  ) {
-    const body = new p2.Body({
-      position: pos,
-      angle,
-      velocity: vel,
-      angularVelocity: angularVel,
-      ...data.bodyOptions,
-    });
-    const shape = new p2.Box({
-      width: data.width,
-      height: data.height,
-    });
-    body.addShape(shape);
-    dataMap[body.id] = data;
-    world.addBody(body);
-
-    function destroy() {
-      world.removeBody(body);
-      delete dataMap[body.id];
-    }
-
-    return { destroy, body };
-  }
+  const entities = new Entities(world);
 
   let then = performance.now();
   const step = 1 / 60;
   function tick() {
     const now = performance.now();
-    const elapsed = now - then;
-    Object.values(updaters).forEach((u) => u(elapsed));
-    world.step(step, elapsed, 10);
+    const delta = now - then;
+    entities.update(delta);
+    world.step(step, delta, 10);
     then = now;
     setTimeout(() => tick(), step * 1000);
   }
@@ -93,7 +55,7 @@ export function createWorld(io: IO) {
   emiter();
 
   io.on("connection", (socket) => {
-    const { destroy, body } = create(
+    const { destroy, body } = entities.createBody(
       {
         id: socket.id,
         height: 4,
@@ -107,16 +69,18 @@ export function createWorld(io: IO) {
       0,
     );
 
+    // TODO move this to interacting with the player class (see entities TODO)
+
     let inputMap: any = {};
     socket.on("input", (map) => {
       inputMap = map;
     });
 
     socket.on("data", (bodyId, res) => {
-      res(dataMap[bodyId]);
+      res(entities.getData(bodyId));
     });
 
-    updaters[socket.id] = () => {
+    entities.updaters[socket.id] = () => {
       const v = [0, 0];
       if (inputMap.left) v[0] -= 1;
       if (inputMap.right) v[0] += 1;
@@ -129,20 +93,7 @@ export function createWorld(io: IO) {
 
     socket.on("disconnect", () => {
       destroy();
-      delete updaters[socket.id];
+      delete entities.updaters[socket.id];
     });
   });
-}
-
-function stringToColour(str: string) {
-  let hash = 0;
-  str.split("").forEach((char) => {
-    hash = char.charCodeAt(0) + ((hash << 5) - hash);
-  });
-  let colour = "#";
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xff;
-    colour += value.toString(16).padStart(2, "0");
-  }
-  return colour;
 }
