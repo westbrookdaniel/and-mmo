@@ -5,7 +5,7 @@ import type {
   RemoveAcknowledgements,
   StrictEventEmitter,
 } from "socket.io/dist/typed-events";
-import { Entities } from "./entities.js";
+import { BodyDiff, Entities } from "./entities.js";
 import { stringToColour } from "./util.js";
 
 type IO = StrictEventEmitter<
@@ -42,13 +42,19 @@ export function createWorld(io: IO) {
   tick();
 
   function emiter() {
-    const data = world.bodies.map((b) => [
-      b.id,
-      [b.position[0], b.position[1]],
-      b.angle,
-      [b.velocity[0], b.velocity[1]],
-      b.angularVelocity,
-    ]);
+    const data = world.bodies.map((b) => {
+      const bodyDiff: BodyDiff = {
+        // TODO could optimise this by calculating this diff
+        // from this from what changed since last tick
+        // but we'd need add an endpoint for getting the full data
+        // or add to current data one
+        position: Array.from(b.position),
+        angle: b.angle,
+        velocity: Array.from(b.velocity),
+        angularVelocity: b.angularVelocity,
+      };
+      return [b.id, bodyDiff];
+    });
     io.emit("tick", data);
     setTimeout(() => emiter(), (1 / 30) * 1000);
   }
@@ -63,10 +69,9 @@ export function createWorld(io: IO) {
         color: stringToColour(socket.id),
         bodyOptions: defaultBodyOptions,
       },
-      [20, 30],
-      0,
-      [0, 0],
-      0,
+      {
+        position: [20, 30],
+      },
     );
 
     // TODO move this to interacting with the player class (see entities TODO)

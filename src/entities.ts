@@ -8,6 +8,13 @@ export interface Data {
   bodyOptions: Partial<p2.BodyOptions>;
 }
 
+export interface BodyDiff {
+  position: number[];
+  angle?: number;
+  velocity?: number[];
+  angularVelocity?: number;
+}
+
 export class Entities {
   private dataMap: Record<number, Data> = {};
 
@@ -26,19 +33,9 @@ export class Entities {
 
   // TODO swap this to private and wrap in a class and creators
   // like new Player > entities.add(Player) .. or Wall
-  createBody(
-    data: Data,
-    // TODO move this and tick to send this data as an object to be spread
-    pos: p2.Vec2,
-    angle: number,
-    vel: p2.Vec2,
-    angularVel: number,
-  ) {
+  createBody(data: Data, bodyDiff: BodyDiff) {
     const body = new p2.Body({
-      position: pos,
-      angle,
-      velocity: vel,
-      angularVelocity: angularVel,
+      ...bodyDiff,
       ...data.bodyOptions,
     });
 
