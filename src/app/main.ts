@@ -2,12 +2,13 @@ import * as PIXI from "pixi.js";
 import { io, Socket } from "socket.io-client";
 import { KeyManager } from "./util/key";
 import { SceneManager } from "./util/scene";
-import { Application } from "pixi.js";
 import * as p2 from "p2-es";
 import { onPhysicsTick } from "./onPhysicsTick";
 import { renderBodies } from "./renderBodies";
+import { renderDebugBodies } from "./renderDebugBodies";
+import { Renders } from "../objects";
 
-const app = new Application();
+const app = new PIXI.Application();
 // @ts-expect-error
 globalThis.__PIXI_APP__ = app;
 
@@ -50,13 +51,16 @@ async function preload() {
     { alias: "down", keys: ["s", "S", "ArrowDown"] },
   ]);
 
+  // TODO preload just used in that scene?
+  await Promise.all(Renders.map((R) => R.load()));
+
   scene.set("game");
 }
 
 async function game() {
   const bg = new PIXI.Graphics();
   bg.rect(0, 0, 150, 90);
-  bg.fill("#333");
+  bg.fill("#323c39");
   scene.camera.addChild(bg);
 
   let lastTick: any[] = [];
@@ -69,5 +73,7 @@ async function game() {
     renderBodies(lastTick.map((t) => t[0]));
   });
 
-  // setTimeout(() => scene.set("game"), 2000);
+  // app.ticker.add(() => {
+  //   renderDebugBodies(lastTick.map((t) => t[0]));
+  // });
 }

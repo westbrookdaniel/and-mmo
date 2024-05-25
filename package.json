@@ -21,10 +21,9 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.12.12",
     "concurrently": "^8.2.2",
-    "tsx": "^4.10.5",
+    "tsx": "^4.11.0",
     "typescript": "^4.9.5",
-    "vite": "^4.5.3",
-    "vitest": "^1.6.0"
+    "vite": "^4.5.3"
   },
   "scripts": {
     "dev": "NODE_ENV='dev' concurrently \"pnpm dev:client\" \"pnpm dev:server\"",

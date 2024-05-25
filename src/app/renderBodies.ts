@@ -1,16 +1,21 @@
-import * as PIXI from "pixi.js";
-import { emitForData } from "./util";
 import { Creator } from "./util/creator";
+import { Renders } from "../objects";
+import { physicsCreator } from "./onPhysicsTick";
+import * as p2 from "p2-es";
 
-const creator = new Creator(async (bodyId: string) => {
-  // TODO we're double fetching this here and onPhysicsTick
-  const data = await emitForData("data", parseInt(bodyId));
-  if (!data) throw new Error("No data for body");
+const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
+  const obj = physicsCreator.get(bodyId);
+  const R: any = Renders.find((o) => o.type === obj.type);
+  if (!R) throw new Error("Something went wrong");
 
-  const g = new PIXI.Graphics()
-    .rect(-data.width / 2, -data.height / 2, data.width, data.height)
-    .fill(data.color);
-  scene.camera.addChild(g);
+  const ren = new R(obj);
+
+  // Update positions pre add to ensure no jump
+  ren.container.x = b.position[0];
+  ren.container.y = b.position[1];
+  if (!ren.opts.fixed) ren.container.rotation = b.angle;
+
+  scene.camera.addChild(ren.container);
 
   // if (data.id === socket.id) {
   //   scene.camera.follow(g, {
@@ -21,8 +26,8 @@ const creator = new Creator(async (bodyId: string) => {
   // }
 
   return {
-    data: g,
-    destroy: () => g.destroy(),
+    data: ren,
+    destroy: () => ren.container.destroy(),
   };
 });
 
@@ -31,19 +36,20 @@ export function renderBodies(bodyIds: number[]) {
     const bodyId = bodyIds.find((id) => id === b.id);
     if (!bodyId) return;
 
-    creator.create(bodyId);
+    renderCreator.create(bodyId, b);
 
-    const g = creator.get(bodyId);
-    if (!g) return;
-    g.x = b.position[0];
-    g.y = b.position[1];
-    g.rotation = b.angle;
+    const r = renderCreator.get(bodyId);
+    if (!r) return;
+    r.container.x = b.position[0];
+    r.container.y = b.position[1];
+    r.container.zIndex = b.position[1];
+    if (!r.opts.fixed) r.container.rotation = b.angle;
   });
 
   const used = bodyIds.map((id) => id.toString());
-  creator.created.forEach((k) => {
+  renderCreator.created.forEach((k) => {
     if (!used.includes(k)) {
-      creator.remove(k);
+      renderCreator.remove(k);
     }
   });
 }

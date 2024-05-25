@@ -6,6 +6,7 @@ import type {
   StrictEventEmitter,
 } from "socket.io/dist/typed-events";
 import { BodyDiff, Entities } from "./entities.js";
+import { PlayerObject } from "./objects/Player.js";
 import { stringToColour } from "./util.js";
 
 type IO = StrictEventEmitter<
@@ -18,12 +19,6 @@ type IO = StrictEventEmitter<
     any
   >
 >;
-
-const defaultBodyOptions: Partial<p2.BodyOptions> = {
-  mass: 1,
-  damping: 0.7,
-  fixedRotation: false,
-};
 
 export function createWorld(io: IO) {
   const world = new p2.World({ gravity: [0, 0] });
@@ -61,18 +56,11 @@ export function createWorld(io: IO) {
   emiter();
 
   io.on("connection", (socket) => {
-    const { destroy, body } = entities.createBody(
-      {
-        id: socket.id,
-        height: 4,
-        width: 4,
-        color: stringToColour(socket.id),
-        bodyOptions: defaultBodyOptions,
-      },
-      {
-        position: [20, 30],
-      },
-    );
+    const player = new PlayerObject(socket.id, stringToColour(socket.id));
+
+    const destroy = entities.addObject(player, {
+      position: [20, 30],
+    });
 
     // TODO move this to interacting with the player class (see entities TODO)
 
@@ -81,8 +69,9 @@ export function createWorld(io: IO) {
       inputMap = map;
     });
 
-    socket.on("data", (bodyId, res) => {
-      res(entities.getData(bodyId));
+    socket.on("object", (bodyId, res) => {
+      const object = entities.getObject(bodyId);
+      res({ name: object?.type, args: object?.args() ?? [] });
     });
 
     entities.updaters[socket.id] = () => {
@@ -93,7 +82,7 @@ export function createWorld(io: IO) {
       if (inputMap.down) v[1] += 1;
       p2.vec2.normalize(v, v);
       p2.vec2.multiply(v, v, [0.3, 0.3]);
-      body.applyImpulse(v);
+      player.body.applyImpulse(v);
     };
 
     socket.on("disconnect", () => {

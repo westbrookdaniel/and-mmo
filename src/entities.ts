@@ -1,12 +1,5 @@
 import * as p2 from "p2-es";
-
-export interface Data {
-  id: string;
-  color: string;
-  width: number;
-  height: number;
-  bodyOptions: Partial<p2.BodyOptions>;
-}
+import type { ObjectType } from "./objects";
 
 export interface BodyDiff {
   position: number[];
@@ -16,44 +9,33 @@ export interface BodyDiff {
 }
 
 export class Entities {
-  private dataMap: Record<number, Data> = {};
+  // Map from bodyId to Object
+  private objMap: Record<number, ObjectType> = {};
 
   // TODO move this to private and added internally
   updaters: Record<string, (d: number) => void> = {};
 
   constructor(private world: p2.World) {}
 
-  getData(bodyId: number): Data | null {
-    return this.dataMap[bodyId] ?? null;
+  getObject(bodyId: number): ObjectType | null {
+    return this.objMap[bodyId] ?? null;
   }
 
   update(delta: number) {
     Object.values(this.updaters).forEach((u) => u(delta));
   }
 
-  // TODO swap this to private and wrap in a class and creators
-  // like new Player > entities.add(Player) .. or Wall
-  createBody(data: Data, bodyDiff: BodyDiff) {
-    const body = new p2.Body({
-      ...bodyDiff,
-      ...data.bodyOptions,
+  addObject(obj: ObjectType, bodyDiff: BodyDiff) {
+    Object.entries(bodyDiff).forEach(([key, val]) => {
+      (obj.body as any)[key] = val;
     });
 
-    const shape = new p2.Box({
-      width: data.width,
-      height: data.height,
-    });
+    this.objMap[obj.body.id] = obj;
+    this.world.addBody(obj.body);
 
-    body.addShape(shape);
-    this.dataMap[body.id] = data;
-    this.world.addBody(body);
-
-    return {
-      destroy: () => {
-        this.world.removeBody(body);
-        delete this.dataMap[body.id];
-      },
-      body,
+    return () => {
+      this.world.removeBody(obj.body);
+      delete this.objMap[obj.body.id];
     };
   }
 }
