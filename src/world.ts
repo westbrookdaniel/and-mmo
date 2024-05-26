@@ -62,12 +62,16 @@ export function createWorld(io: IO) {
       position: [20, 30],
     });
 
-    // TODO move this to interacting with the player class (see entities TODO)
-
     let inputMap: any = {};
     socket.on("input", (map) => {
       inputMap = map;
     });
+
+    // TODO this, and triggering "attack event" for player
+    // socket.on("inputOn", (map) => {
+    //     TODO sprite changing on player
+    //     TODO swing a lil thing out in front? OR apply impulse?
+    // });
 
     socket.on("object", (bodyId, res) => {
       const object = entities.getObject(bodyId);
