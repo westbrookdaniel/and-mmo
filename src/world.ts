@@ -64,6 +64,7 @@ export function createWorld(io: IO) {
       inputMap = map;
 
       if (alias === "action" && pressed) {
+        console.log(alias, pressed);
         // TODO sprite changing on player
         // TODO swing a lil thing out in front? OR apply impulse?
       }
@@ -71,7 +72,7 @@ export function createWorld(io: IO) {
 
     socket.on("getObject", (bodyId, res) => {
       const object = entities.getObject(bodyId);
-      res({ name: object?.constructor.name, args: object?.args() });
+      res({ name: object?.constructor.name, id: object?.id });
     });
 
     entities.add(socket.id, () => {

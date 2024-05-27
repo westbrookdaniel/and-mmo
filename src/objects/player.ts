@@ -22,10 +22,6 @@ export class PlayerObject extends BaseObject {
 
     this.body.addShape(shape);
   }
-
-  args() {
-    return this.id;
-  }
 }
 
 export class PlayerRender extends BaseRender {
@@ -55,8 +51,8 @@ export class PlayerRender extends BaseRender {
     t.textureSource.scaleMode = "nearest";
   }
 
-  constructor(_obj: PlayerObject) {
-    super();
+  constructor(obj: PlayerObject) {
+    super(obj);
 
     const c = this.container;
 

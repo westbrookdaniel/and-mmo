@@ -3,7 +3,7 @@ import * as p2 from "p2-es";
 
 export abstract class BaseObject {
   abstract body: p2.Body;
-  abstract args(): any;
+  abstract id: string;
 }
 
 export abstract class BaseComponent {
@@ -22,5 +22,15 @@ export abstract class BaseRender {
     const c = this.components.find((c) => c.name === component.name);
     if (!c) throw new Error(`Unable to find component ${component.name}`);
     return c as InstanceType<T> | undefined;
+  }
+
+  constructor(obj: BaseObject) {
+    console.log(obj.body.id);
+    socket.on("FOO", (componentName) => {
+      const c = this.components.find((c) => c.name === componentName);
+      if (!c) throw new Error(`Unable to find component ${componentName}`);
+      // TODO how does the server interact with components?
+      // could I use something like https://github.com/GoogleChromeLabs/comlink
+    });
   }
 }
