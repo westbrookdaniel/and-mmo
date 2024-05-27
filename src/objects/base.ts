@@ -24,8 +24,8 @@ export abstract class BaseRender {
     return c as InstanceType<T> | undefined;
   }
 
-  constructor(obj: BaseObject) {
-    console.log(obj.body.id);
+  constructor(public obj: BaseObject) {
+    // console.log(obj.body.id);
     socket.on("FOO", (componentName) => {
       const c = this.components.find((c) => c.name === componentName);
       if (!c) throw new Error(`Unable to find component ${componentName}`);
@@ -33,4 +33,6 @@ export abstract class BaseRender {
       // could I use something like https://github.com/GoogleChromeLabs/comlink
     });
   }
+
+  update() {}
 }

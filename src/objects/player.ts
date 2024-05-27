@@ -62,11 +62,21 @@ export class PlayerRender extends BaseRender {
 
     const s = this.component(SpriteChanger)!.sprite;
 
-    s.width = s.width / 4;
-    s.height = s.height / 4;
+    s.scale = 0.25;
     s.x = -s.width / 3;
     s.y = -s.height / 1.05;
 
     c.addChild(s);
+  }
+
+  update() {
+    const s = this.component(SpriteChanger)!.sprite;
+    if (this.obj.body.velocity[0] < 0) {
+      s.scale.x = -0.25;
+      s.x = s.width / 3;
+    } else {
+      s.scale.x = 0.25;
+      s.x = -s.width / 3;
+    }
   }
 }

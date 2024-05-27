@@ -47,6 +47,8 @@ export function renderBodies(bodyIds: number[]) {
     if (!r.component(RenderOptions)?.options.fixed) {
       r.container.rotation = b.angle;
     }
+
+    r.update();
   });
 
   const used = bodyIds.map((id) => id.toString());
