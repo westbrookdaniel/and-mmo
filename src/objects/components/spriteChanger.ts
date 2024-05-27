@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { BaseComponent } from "../base.js";
 
 type Options = Record<
   string,
@@ -10,7 +11,7 @@ type Options = Record<
   }
 >;
 
-export class SpriteChanger {
+export class SpriteChanger extends BaseComponent {
   sprite: PIXI.AnimatedSprite;
   spriteMap: Record<string, PIXI.AnimatedSprite> = {};
 
@@ -26,6 +27,8 @@ export class SpriteChanger {
   }
 
   constructor(init: string, opts: Options) {
+    super();
+
     Object.entries(opts).map(([key, value]) => {
       const s = new PIXI.AnimatedSprite(
         value.textures.map((t) => PIXI.Texture.from(t)),

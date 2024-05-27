@@ -1,6 +1,7 @@
 import { Creator } from "./util/creator";
 import * as p2 from "p2-es";
 import { getRenderForBody } from "./util/net";
+import { RenderOptions } from "../objects/components/renderOptions";
 
 const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
   const ren = getRenderForBody(bodyId);
@@ -8,7 +9,10 @@ const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
   // Update positions pre add to ensure no jitter
   ren.container.x = b.position[0];
   ren.container.y = b.position[1];
-  if (!ren.opts.fixed) ren.container.rotation = b.angle;
+
+  if (!ren.component(RenderOptions)?.options.fixed) {
+    ren.container.rotation = b.angle;
+  }
 
   scene.camera.addChild(ren.container);
 
@@ -35,10 +39,14 @@ export function renderBodies(bodyIds: number[]) {
 
     const r = renderCreator.get(bodyId);
     if (!r) return;
+
     r.container.x = b.position[0];
     r.container.y = b.position[1];
     r.container.zIndex = b.position[1];
-    if (!r.opts.fixed) r.container.rotation = b.angle;
+
+    if (!r.component(RenderOptions)?.options.fixed) {
+      r.container.rotation = b.angle;
+    }
   });
 
   const used = bodyIds.map((id) => id.toString());

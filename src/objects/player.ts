@@ -1,11 +1,15 @@
 import * as PIXI from "pixi.js";
 import * as p2 from "p2-es";
 import { SpriteChanger } from "./components/spriteChanger.js";
+import { RenderOptions } from "./components/renderOptions.js";
+import { BaseRender, BaseObject } from "./base.js";
 
-export class PlayerObject {
+export class PlayerObject extends BaseObject {
   body: p2.Body;
 
   constructor(public id: string) {
+    super();
+
     this.body = new p2.Body({
       mass: 1,
       damping: 0.7,
@@ -24,27 +28,27 @@ export class PlayerObject {
   }
 }
 
-// TODO move this to just be Component[] (better for finding and detecting component types)
-// Same for above?
-export class PlayerRender {
-  opts = { fixed: true };
+export class PlayerRender extends BaseRender {
   container = new PIXI.Container();
 
-  sprite = new SpriteChanger("idle", {
-    idle: {
-      textures: new Array(2)
-        .fill(null)
-        .map((_, i) => `characters (idle) ${i}.aseprite`),
-      speed: 0.02,
-      loop: true,
-    },
-    attack: {
-      textures: new Array(6)
-        .fill(null)
-        .map((_, i) => `characters (attack) ${i}.aseprite`),
-      speed: 0.3,
-    },
-  });
+  components = [
+    new RenderOptions({ fixed: true }),
+    new SpriteChanger("idle", {
+      idle: {
+        textures: new Array(2)
+          .fill(null)
+          .map((_, i) => `characters (idle) ${i}.aseprite`),
+        speed: 0.02,
+        loop: true,
+      },
+      attack: {
+        textures: new Array(6)
+          .fill(null)
+          .map((_, i) => `characters (attack) ${i}.aseprite`),
+        speed: 0.3,
+      },
+    }),
+  ];
 
   static async load() {
     const t = await PIXI.Assets.load("/assets/characters.json");
@@ -52,13 +56,15 @@ export class PlayerRender {
   }
 
   constructor(_obj: PlayerObject) {
+    super();
+
     const c = this.container;
 
     c.addChild(
       new PIXI.Graphics().ellipse(0, 0.3, 1.6, 0.8).fill("rgba(0, 0, 0, 0.2)"),
     );
 
-    const s = this.sprite.sprite;
+    const s = this.component(SpriteChanger)!.sprite;
 
     s.width = s.width / 4;
     s.height = s.height / 4;

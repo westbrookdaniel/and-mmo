@@ -71,7 +71,7 @@ export function createWorld(io: IO) {
 
     socket.on("getObject", (bodyId, res) => {
       const object = entities.getObject(bodyId);
-      res({ name: object?.constructor.name, args: object?.args?.() });
+      res({ name: object?.constructor.name, args: object?.args() });
     });
 
     entities.add(socket.id, () => {
