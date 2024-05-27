@@ -9,25 +9,17 @@ export class KeyManager {
   private entries: KeymapEntry[] = [];
   mouse = { x: 0, y: 0 };
   map: Record<string, boolean> = new Proxy(map, {
-    set(target, prop, reciever) {
-      const success = Reflect.set(target, prop, reciever);
-      socket.emit("input", map);
+    set(target, alias, pressed) {
+      const success = Reflect.set(target, alias, pressed);
+      socket.emit("input", map, alias, pressed);
       return success;
     },
   });
-  subs: { alias: string; cb: () => void }[] = [];
 
   private onKey(key: string, pressed: boolean) {
     this.entries.forEach((entry) => {
       if (entry.keys.includes(key)) {
         if (this.map[entry.alias] === pressed) return;
-
-        if (pressed) {
-          this.subs
-            .filter((s) => s.alias === entry.alias)
-            .forEach((s) => s.cb());
-        }
-
         this.map[entry.alias] = pressed;
       }
     });
@@ -44,12 +36,5 @@ export class KeyManager {
       document.addEventListener("keyup", (e) => this.onKey(e.key, false));
     }
     this.entries.push(...entries);
-  }
-
-  on(alias: string, cb: () => void) {
-    // TODO unsub
-    const entry = this.entries.find((e) => e.alias === alias);
-    if (!entry) throw new Error("Entry does not exist");
-    this.subs.push({ alias, cb });
   }
 }

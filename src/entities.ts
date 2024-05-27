@@ -11,9 +11,15 @@ export interface BodyDiff {
 export class Entities {
   // Map from bodyId to Object
   private objMap: Record<number, ObjectType> = {};
+  private updaters: Record<string, (d: number) => void> = {};
 
-  // TODO move this to private and added internally
-  updaters: Record<string, (d: number) => void> = {};
+  add(key: string, cb: (d: number) => void) {
+    this.updaters[key] = cb;
+  }
+
+  remove(key: string) {
+    delete this.updaters[key];
+  }
 
   constructor(private world: p2.World) {}
 

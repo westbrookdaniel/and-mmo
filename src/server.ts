@@ -10,7 +10,7 @@ import compression from "compression";
 import { createWorld } from "./world.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const { PORT = 4000, NODE_ENV } = process.env;
+const { PORT = 1234, NODE_ENV } = process.env;
 const isDev = NODE_ENV === "dev";
 
 const app = express();

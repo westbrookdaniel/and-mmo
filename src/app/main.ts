@@ -27,7 +27,7 @@ app.init({ resizeTo: window }).then(() => {
 
   globalThis.socket = io(
     import.meta.env.MODE === "development"
-      ? "http://localhost:4000"
+      ? "http://localhost:1234"
       : window.location.origin,
   );
 
@@ -49,9 +49,9 @@ async function preload() {
     { alias: "right", keys: ["d", "D", "ArrowRight"] },
     { alias: "up", keys: ["w", "W", "ArrowUp"] },
     { alias: "down", keys: ["s", "S", "ArrowDown"] },
+    { alias: "action", keys: [" "] },
   ]);
 
-  // TODO preload just used in that scene?
   await Promise.all(Renders.map((R) => R.load()));
 
   scene.set("game");

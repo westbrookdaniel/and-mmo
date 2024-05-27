@@ -1,16 +1,11 @@
 import { Creator } from "./util/creator";
-import { Renders } from "../objects";
-import { physicsCreator } from "./onPhysicsTick";
 import * as p2 from "p2-es";
+import { getRenderForBody } from "./util/net";
 
 const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
-  const obj = physicsCreator.get(bodyId);
-  const R: any = Renders.find((o) => o.type === obj.type);
-  if (!R) throw new Error("Something went wrong");
+  const ren = getRenderForBody(bodyId);
 
-  const ren = new R(obj);
-
-  // Update positions pre add to ensure no jump
+  // Update positions pre add to ensure no jitter
   ren.container.x = b.position[0];
   ren.container.y = b.position[1];
   if (!ren.opts.fixed) ren.container.rotation = b.angle;

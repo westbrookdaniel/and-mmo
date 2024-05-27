@@ -1,5 +1,6 @@
-import { Objects } from "../../objects";
+import { Objects, Renders } from "../../objects";
 import * as p2 from "p2-es";
+import { physicsCreator } from "../onPhysicsTick";
 
 export function emitForData(ev: string, data: any): any {
   return new Promise((res) => {
@@ -14,6 +15,18 @@ export async function getObjectForBody(bodyId: string) {
   const obj = new O(data.args);
   obj.body.id = parseInt(bodyId);
   return obj;
+}
+
+export function getRenderForBody(bodyId: string) {
+  const obj = physicsCreator.get(bodyId);
+  if (!obj) throw new Error("Something went wrong");
+  const R = Renders.find(
+    (o) =>
+      o.name.replace("Render", "") ===
+      obj.constructor.name.replace("Object", ""),
+  );
+  if (!R) throw new Error("Something went wrong");
+  return new R(obj);
 }
 
 export function applyBodyDiff(body: p2.Body, bodyDiff: any) {

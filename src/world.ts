@@ -6,8 +6,7 @@ import type {
   StrictEventEmitter,
 } from "socket.io/dist/typed-events";
 import { BodyDiff, Entities } from "./entities.js";
-import { PlayerObject } from "./objects/Player.js";
-import { stringToColour } from "./util.js";
+import { PlayerObject } from "./objects/player.js";
 
 type IO = StrictEventEmitter<
   DefaultEventsMap,
@@ -39,10 +38,7 @@ export function createWorld(io: IO) {
   function emiter() {
     const data = world.bodies.map((b) => {
       const bodyDiff: BodyDiff = {
-        // TODO could optimise this by calculating this diff
-        // from this from what changed since last tick
-        // but we'd need add an endpoint for getting the full data
-        // or add to current data one
+        // TODO experiment sending the inputs to cause physics sim instead of sending the sim
         position: Array.from(b.position),
         angle: b.angle,
         velocity: Array.from(b.velocity),
@@ -55,30 +51,30 @@ export function createWorld(io: IO) {
   }
   emiter();
 
+  // Player controller
   io.on("connection", (socket) => {
-    const player = new PlayerObject(socket.id, stringToColour(socket.id));
+    const player = new PlayerObject(socket.id);
 
     const destroy = entities.addObject(player, {
       position: [20, 30],
     });
 
     let inputMap: any = {};
-    socket.on("input", (map) => {
+    socket.on("input", (map, alias, pressed) => {
       inputMap = map;
+
+      if (alias === "action" && pressed) {
+        // TODO sprite changing on player
+        // TODO swing a lil thing out in front? OR apply impulse?
+      }
     });
 
-    // TODO this, and triggering "attack event" for player
-    // socket.on("inputOn", (map) => {
-    //     TODO sprite changing on player
-    //     TODO swing a lil thing out in front? OR apply impulse?
-    // });
-
-    socket.on("object", (bodyId, res) => {
+    socket.on("getObject", (bodyId, res) => {
       const object = entities.getObject(bodyId);
-      res({ name: object?.type, args: object?.args() ?? [] });
+      res({ name: object?.constructor.name, args: object?.args?.() });
     });
 
-    entities.updaters[socket.id] = () => {
+    entities.add(socket.id, () => {
       const v = [0, 0];
       if (inputMap.left) v[0] -= 1;
       if (inputMap.right) v[0] += 1;
@@ -87,11 +83,11 @@ export function createWorld(io: IO) {
       p2.vec2.normalize(v, v);
       p2.vec2.multiply(v, v, [0.3, 0.3]);
       player.body.applyImpulse(v);
-    };
+    });
 
     socket.on("disconnect", () => {
       destroy();
-      delete entities.updaters[socket.id];
+      entities.remove(socket.id);
     });
   });
 }

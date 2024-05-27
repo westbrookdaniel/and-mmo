@@ -3,16 +3,9 @@ import * as p2 from "p2-es";
 import { SpriteChanger } from "./components/spriteChanger.js";
 
 export class PlayerObject {
-  static type = "Player";
-  type = "Player";
-
   body: p2.Body;
 
-  constructor(
-    public id: string,
-    // TODO move this to be user data or something
-    public color: string,
-  ) {
+  constructor(public id: string) {
     this.body = new p2.Body({
       mass: 1,
       damping: 0.7,
@@ -27,16 +20,13 @@ export class PlayerObject {
   }
 
   args() {
-    return [this.id, this.color];
+    return this.id;
   }
 }
 
+// TODO move this to just be Component[] (better for finding and detecting component types)
+// Same for above?
 export class PlayerRender {
-  // TODO rework to use PlayerRender.constructor.name
-  static type = "Player";
-  type = "Player";
-
-  // TODO component for this?
   opts = { fixed: true };
   container = new PIXI.Container();
 
