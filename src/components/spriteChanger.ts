@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { BaseComponent } from "../base.js";
+import { BaseComponent } from "../base";
 
 type Options = Record<
   string,

@@ -1,4 +1,4 @@
-import { BaseComponent } from "../base.js";
+import { BaseComponent } from "../base";
 
 interface Options {
   fixed: boolean;

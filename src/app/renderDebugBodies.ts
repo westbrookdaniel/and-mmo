@@ -2,14 +2,17 @@ import { Creator } from "./util/creator";
 import { physicsCreator } from "./onPhysicsTick";
 import * as p2 from "p2-es";
 import * as PIXI from "pixi.js";
+import { Body } from "../components/body";
 
 const renderDebugCreator = new Creator(async (bodyId: string, b: p2.Body) => {
-  const obj = physicsCreator.get(bodyId);
+  const obj = physicsCreator.get(bodyId)!;
 
   const c = new PIXI.Container();
   c.zIndex = 9999999;
 
-  obj.body.shapes.forEach((s: any) => {
+  const body = obj.component(Body)!.body;
+
+  body.shapes.forEach((s: any) => {
     // Just render from the name for now
     const name = s.constructor.name;
     if (name === "Box") {

@@ -5,8 +5,7 @@ import { SceneManager } from "./util/scene";
 import * as p2 from "p2-es";
 import { onPhysicsTick } from "./onPhysicsTick";
 import { renderBodies } from "./renderBodies";
-import { renderDebugBodies } from "./renderDebugBodies";
-import { Renders } from "../objects";
+import { Objects } from "../objects";
 
 const app = new PIXI.Application();
 // @ts-expect-error
@@ -52,7 +51,7 @@ async function preload() {
     { alias: "action", keys: [" "] },
   ]);
 
-  await Promise.all(Renders.map((R) => R.load()));
+  await Promise.all(Objects.map((R) => R.load()));
 
   scene.set("game");
 }

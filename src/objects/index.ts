@@ -1,5 +1,3 @@
-import { PlayerObject, PlayerRender } from "./player";
+import { Player } from "./player";
 
-export const Objects = [PlayerObject];
-
-export const Renders = [PlayerRender];
+export const Objects = [Player];

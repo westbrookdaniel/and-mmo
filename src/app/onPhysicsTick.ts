@@ -1,18 +1,21 @@
 import { applyBodyDiff, getObjectForBody } from "./util/net";
 import { Creator } from "./util/creator";
 import type { BodyDiff } from "../entities";
+import { Body } from "../components/body";
 
 export const physicsCreator = new Creator(
   async (bodyId: string, bodyDiff: BodyDiff) => {
     const obj = await getObjectForBody(bodyId);
 
-    applyBodyDiff(obj.body, bodyDiff);
+    const body = obj.component(Body)!.body;
 
-    world.addBody(obj.body);
+    applyBodyDiff(body, bodyDiff);
+
+    world.addBody(body);
 
     return {
       data: obj,
-      destroy: () => world.removeBody(obj.body),
+      destroy: () => world.removeBody(body),
     };
   },
 );
@@ -24,7 +27,9 @@ export function onPhysicsTick(objects: any[]) {
     const obj = physicsCreator.get(bodyId);
     if (!obj) return;
 
-    applyBodyDiff(obj.body, bodyDiff);
+    const body = obj.component(Body)!.body;
+
+    applyBodyDiff(body, bodyDiff);
   });
 
   world.bodies.forEach((b) => {

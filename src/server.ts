@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import morgan from "morgan";
 import compression from "compression";
-import { createWorld } from "./world.js";
+import { createWorld } from "./world";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const { PORT = 1234, NODE_ENV } = process.env;

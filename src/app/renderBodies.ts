@@ -1,20 +1,23 @@
 import { Creator } from "./util/creator";
 import * as p2 from "p2-es";
 import { getRenderForBody } from "./util/net";
-import { RenderOptions } from "../objects/components/renderOptions";
+import { RenderOptions } from "../components/renderOptions";
+import { Render } from "../components/render";
 
 const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
   const ren = getRenderForBody(bodyId);
 
+  const container = ren.component(Render)!.container;
+
   // Update positions pre add to ensure no jitter
-  ren.container.x = b.position[0];
-  ren.container.y = b.position[1];
+  container.x = b.position[0];
+  container.y = b.position[1];
 
   if (!ren.component(RenderOptions)?.options.fixed) {
-    ren.container.rotation = b.angle;
+    container.rotation = b.angle;
   }
 
-  scene.camera.addChild(ren.container);
+  scene.camera.addChild(container);
 
   // if (data.id === socket.id) {
   //   scene.camera.follow(g, {
@@ -26,7 +29,7 @@ const renderCreator = new Creator(async (bodyId: string, b: p2.Body) => {
 
   return {
     data: ren,
-    destroy: () => ren.container.destroy(),
+    destroy: () => container.destroy(),
   };
 });
 
@@ -40,12 +43,14 @@ export function renderBodies(bodyIds: number[]) {
     const r = renderCreator.get(bodyId);
     if (!r) return;
 
-    r.container.x = b.position[0];
-    r.container.y = b.position[1];
-    r.container.zIndex = b.position[1];
+    const container = r.component(Render)!.container;
+
+    container.x = b.position[0];
+    container.y = b.position[1];
+    container.zIndex = b.position[1];
 
     if (!r.component(RenderOptions)?.options.fixed) {
-      r.container.rotation = b.angle;
+      container.rotation = b.angle;
     }
 
     r.update();

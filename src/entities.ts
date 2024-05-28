@@ -1,5 +1,6 @@
+import { Body } from "./components/body";
 import * as p2 from "p2-es";
-import type { BaseObject } from "./objects";
+import type { BaseEntity } from "./base";
 
 export interface BodyDiff {
   position: number[];
@@ -10,7 +11,7 @@ export interface BodyDiff {
 
 export class Entities {
   // Map from bodyId to Object
-  private objMap: Record<number, BaseObject> = {};
+  private objMap: Record<number, BaseEntity> = {};
   private updaters: Record<string, (d: number) => void> = {};
 
   add(key: string, cb: (d: number) => void) {
@@ -23,7 +24,7 @@ export class Entities {
 
   constructor(private world: p2.World) {}
 
-  getObject(bodyId: number): BaseObject | null {
+  getObject(bodyId: number): BaseEntity | null {
     return this.objMap[bodyId] ?? null;
   }
 
@@ -31,17 +32,22 @@ export class Entities {
     Object.values(this.updaters).forEach((u) => u(delta));
   }
 
-  addObject(obj: BaseObject, bodyDiff: BodyDiff) {
+  addObject(ent: BaseEntity, bodyDiff: BodyDiff) {
+    // TODO is having this body stuff here the way to go?
+    const body = ent.component(Body)?.body;
+    if (!body) return () => {};
+
+    this.objMap[body.id] = ent;
+
     Object.entries(bodyDiff).forEach(([key, val]) => {
-      (obj.body as any)[key] = val;
+      (body as any)[key] = val;
     });
 
-    this.objMap[obj.body.id] = obj;
-    this.world.addBody(obj.body);
+    this.world.addBody(body);
 
     return () => {
-      this.world.removeBody(obj.body);
-      delete this.objMap[obj.body.id];
+      this.world.removeBody(body);
+      delete this.objMap[body.id];
     };
   }
 }

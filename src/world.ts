@@ -5,8 +5,9 @@ import type {
   RemoveAcknowledgements,
   StrictEventEmitter,
 } from "socket.io/dist/typed-events";
-import { BodyDiff, Entities } from "./entities.js";
-import { PlayerObject } from "./objects/player.js";
+import { Body } from "./components/body";
+import { BodyDiff, Entities } from "./entities";
+import { Player } from "./objects/player";
 
 type IO = StrictEventEmitter<
   DefaultEventsMap,
@@ -53,7 +54,7 @@ export function createWorld(io: IO) {
 
   // Player controller
   io.on("connection", (socket) => {
-    const player = new PlayerObject(socket.id);
+    const player = new Player(socket.id);
 
     const destroy = entities.addObject(player, {
       position: [20, 30],
@@ -83,7 +84,7 @@ export function createWorld(io: IO) {
       if (inputMap.down) v[1] += 1;
       p2.vec2.normalize(v, v);
       p2.vec2.multiply(v, v, [0.3, 0.3]);
-      player.body.applyImpulse(v);
+      player.component(Body)!.body.applyImpulse(v);
     });
 
     socket.on("disconnect", () => {
